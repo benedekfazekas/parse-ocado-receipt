@@ -24,7 +24,7 @@ smart-pass-discounts = <'Smart Pass products'> <whitespace+> price
 total-charge = <'Total charge'> <whitespace+> price
 
 (* vat-details *)
-vat-details = '*You have paid VAT of' <whitespace*> price-impl <whitespace*> 'on VATable items totalling' <whitespace*> price-impl
+vat-details = 'You have paid VAT of' <whitespace*> price-impl <whitespace*> 'on VATable items totalling' <whitespace*> price-impl
 
 (* product list *)
 product-list = storage+
@@ -42,8 +42,7 @@ expiring = <whitespace*> use-by product-items
 <day-of-week-with-label> = <use-by-label?> <whitespace*> day-of-week
 use-by-label = 'Use by end of'
 <product-items> = (<whitespace*> product-item)+
-product-item = <bold>? product-item-name <bold>? <whitespace*> unit? <whitespace*> unit-price? <whitespace*> unit-price? <whitespace*> quantity <whitespace*> price-actual
-<bold> = '**'
+product-item = product-item-name <whitespace*> unit? <whitespace*> unit-price? <whitespace*> unit-price? <whitespace*> quantity <whitespace*> price-actual
 product-item-name = (uppercase-word <whitespace*> <punctuation*> <whitespace*>)+
 unit = #'\w*\d+\.?\w*'
 unit-price = <'('> price <'/'> <whitespace*> <word> <')'>
@@ -60,12 +59,12 @@ word = #'[\w]+'
 punctuation = #'\W'
 price-actual = price-impl
 <price> = price-impl
-<price-impl> = #'-?£?[0-9]*\.?[0-9]+\*?'
+<price-impl> = #'-?£?[0-9]*\.?[0-9]+'
 day-of-week = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday' | 'tomorrow'
 more-than-a-week = <'Products with a \'use-by\' date over one week'>
 no-use-by = <'Products with no \'use-by\' date'>
 date = #'\d{2}/\d{2}/\d{4}'
 time = #'\d{2}:\d{2}'
 (* TODO: fix the word or weird things part *)
-blabla = (whitespace? (word | '(£)' | '%,' | ': £' | '**' | '?).' | 'é?') whitespace? punctuation? whitespace?)+
+blabla = (whitespace? (word | '(£)' | '%,' | ': £' | '?).' | 'é?') whitespace? punctuation? whitespace?)+
 ignore = #'.*'

@@ -13,6 +13,12 @@
 
 (insta/defparser receipt-parser (slurp (io/resource "ocado-parser.bnf")))
 
+(defn money->float [money]
+  (-> money
+      (str/replace "£" "")
+      Float/parseFloat
+      Math/abs))
+
 (defn handle-storage [storage-details]
   (println storage-details)
   (assoc
@@ -46,7 +52,8 @@
       (let [exp-day-of-week (.getValue (DayOfWeek/valueOf (str/upper-case exp)))]
         (- (if (> exp-day-of-week delivery-day-of-week)
              exp-day-of-week
-             (+ 7 exp-day-of-week)) delivery-day-of-week))))
+             (+ 7 exp-day-of-week))
+           delivery-day-of-week))))
 
 (defn postprocess-receipt [parsed-receipt]
   (println "post processing" (first (drop 2 parsed-receipt)))
@@ -114,7 +121,7 @@
        (str/replace #"(?s)Offers savings\s+You've saved.*" "Offers savings\nYou've saved")
        (str/replace #"(?s)Price per item shown.*?IL[\d-]+" "")
        (str/replace #"(?s)Delivered.*?\(£\)" "")
-       ;(str/replace #"\*" "")
+       (str/replace #"\*" "")
        ;(str/replace "£" "")
        )])
 
