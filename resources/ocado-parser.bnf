@@ -1,4 +1,4 @@
-order = <blabla> order-attrs <blabla> order-summary <blabla> (* payment-details vat-details *) <whitespace+> product-list <whitespace*> <'Offers savings'> <whitespace*> <'You\'ve'> <blabla>
+order = <blabla> order-attrs <blabla> order-summary <blabla> (* payment-details *) vat-details <whitespace+> product-list <whitespace*> <'Offers savings'> <whitespace*> <'You\'ve'> <blabla>
 
 (* Order attributes *)
 <order-attrs> = customer  <whitespace*> order-id <whitespace*> delivery-date
@@ -15,50 +15,57 @@ delivery-date-label = 'Delivery date:'
 time-period = time <'-'> time
 
 (* Order summary *)
-order-summary = gross-cost <whitespace+> delivery-cost <whitespace+> vouchers-discount <whitespace+> offers-savings <whitespace+> smart-pass-discounts <whitespace+> total-charge
+order-summary = gross-cost <whitespace*> delivery-cost? <whitespace*> vouchers-discount? <whitespace*> offers-savings <whitespace*> smart-pass-discounts? <whitespace*> total-charge
 gross-cost = <'Cost of goods'> <whitespace+> price
-delivery-cost = <'Smart Pass delivery'> <whitespace+> price
+delivery-cost = (<'Smart Pass delivery'> | <'Picking, packing and delivery'> ) <whitespace+> price
 vouchers-discount = <'Vouchers and extras'> <whitespace+> price
 offers-savings = <'Offers savings'> <whitespace+> price
 smart-pass-discounts = <'Smart Pass products'> <whitespace+> price
 total-charge = <'Total charge'> <whitespace+> price
 
+(* vat-details *)
+vat-details = '*You have paid VAT of' <whitespace*> price-impl <whitespace*> 'on VATable items totalling' <whitespace*> price-impl
+
 (* product list *)
-product-list = <product-table-header> storage+
+product-list = storage+
 storage = storage-type <whitespace*> (expiring+ | product-items) <whitespace*>
-storage-type = 'Fridge' | 'Cupboard' | 'Freezer' | adult-cupboard | substitutions
+storage-type = fridge | cupboard | freezer | beauty-cupboard | adult-cupboard | substitutions | missing
+fridge = <'Fridge'>
+cupboard = <'Cupboard'>
+freezer = <'Freezer'>
+beauty-cupboard = <'Beauty Boutique'>
 adult-cupboard = <'Age-restricted products'>
 substitutions = <'Substituted items - Alternatives for unavailable items'>
-expiring = <whitespace*> <product-table-header?> use-by product-items
+missing = <'Missing items - Items where we couldn\'t deliver an alternative'>
+expiring = <whitespace*> use-by product-items
 <use-by> = (day-of-week-with-label | more-than-a-week | no-use-by)
 <day-of-week-with-label> = <use-by-label?> <whitespace*> day-of-week
 use-by-label = 'Use by end of'
 <product-items> = (<whitespace*> product-item)+
-product-item = product-item-name unit? <whitespace*> unit-price? <whitespace*> quantity <whitespace*> price-actual
-product-item-name = (uppercase-word <punctuation*> <whitespace+>)+
-unit = #'\d+\w*'
-unit-price = <'('> price <'/'> <whitespace*> <uppercase-word> <')'>
+product-item = <bold>? product-item-name <bold>? <whitespace*> unit? <whitespace*> unit-price? <whitespace*> unit-price? <whitespace*> quantity <whitespace*> price-actual
+<bold> = '**'
+product-item-name = (uppercase-word <whitespace*> <punctuation*> <whitespace*>)+
+unit = #'\w*\d+\.?\w*'
+unit-price = <'('> price <'/'> <whitespace*> <word> <')'>
 quantity = actual <whitespace*> <'/'> <whitespace*> ordered
 actual = count
 ordered = count
 <count> = #'\d+'
-<product-table-header> = word <whitespace*> '/' <whitespace*> word <whitespace*> word <whitespace*> word <whitespace*> word <whitespace*> '(£)' <whitespace*>
-
 
 (* generic *)
 whitespace = #'\s+'
 word = #'[\w]+'
-<uppercase-word> = #'[A-Z_0-9&\']+'
+<uppercase-word> = #'[A-Z_0-9&\'\.]+'
 (* punctuation = #'[\.,]' *)
 punctuation = #'\W'
 price-actual = price-impl
 <price> = price-impl
 <price-impl> = #'-?£?[0-9]*\.?[0-9]+\*?'
-day-of-week = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday'
+day-of-week = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday' | 'tomorrow'
 more-than-a-week = <'Products with a \'use-by\' date over one week'>
 no-use-by = <'Products with no \'use-by\' date'>
 date = #'\d{2}/\d{2}/\d{4}'
 time = #'\d{2}:\d{2}'
 (* TODO: fix the word or weird things part *)
-blabla = (whitespace? (word | '(£)' | '%,' ) whitespace? punctuation? whitespace?)+
+blabla = (whitespace? (word | '(£)' | '%,' | ': £' | '**' | '?).' | 'é?') whitespace? punctuation? whitespace?)+
 ignore = #'.*'
